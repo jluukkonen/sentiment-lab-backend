@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTIMENT_LAB // SATELLITE_LINK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'twitch-bg': '#0e0b16',
+                        'deepNavy': '#0A1124',
+                        'neonGreen': '#00FF94',
+                        'neonRed': '#FF0055',
+                        'cyber-cyan': '#00F0FF',
+                        'twitch-purple': '#9146FF',
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0e0b16;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .glass {
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(145, 70, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(145, 70, 255, 0.5);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden bg-twitch-bg">
+
+    <!-- Header -->
+    <header
+        class="h-16 border-b border-twitch-purple/20 flex items-center justify-between px-6 bg-black/40 backdrop-blur-md z-50">
+        <div class="flex items-center gap-6">
+            <a href="http://127.0.0.1:5500/essays/sentiment/index.html"
+                class="glass px-4 py-2 rounded text-xs font-mono hover:bg-white/10 transition-colors flex items-center gap-2 group">
+                <span class="group-hover:-translate-x-1 transition-transform">←</span> RETURN_TO_BASE
+            </a>
+            <div class="flex items-center gap-2 text-cyber-cyan">
+                <h1 class="font-bold tracking-widest text-lg font-display uppercase">Satellite_Lab <span
+                        class="text-white/20 text-xs text-none normal-case tracking-normal">| Gemini 2.5
+                        Integration</span></h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-[10px] uppercase tracking-wider text-neonGreen font-mono flex items-center gap-2"
+                id="status-indicator">
+                <div class="w-2 h-2 bg-neonGreen rounded-full animate-pulse shadow-[0_0_8px_#00FF94]"></div>
+                SYSTEM_ONLINE
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- Left Panel: Context Data -->
+        <aside class="w-80 border-r border-white/5 flex flex-col bg-black/20">
+            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-white/5">
+                <h2 class="text-xs font-bold text-white/60 font-mono uppercase tracking-widest">Payload_Manifest</h2>
+                <span id="data-count" class="text-xs text-cyber-cyan font-mono">0 UNITS</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar" id="data-container">
+                <div class="text-center mt-10 text-white/30 text-xs font-mono">
+                    [NO_PAYLOAD_DETECTED]<br>
+                    Use the Explorer to transfer data.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Panel: AI Core -->
+        <section class="flex-1 flex flex-col relative">
+            <!-- Background Grid -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none"
+                style="background-image: linear-gradient(rgba(145, 70, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(145, 70, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px;">
+            </div>
+
+            <!-- Chat History -->
+            <div class="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar z-10" id="chat-stream">
+                <!-- System Welcome -->
+                <div class="flex items-start gap-4 opacity-80">
+                    <div class="p-1 rounded bg-gradient-to-br from-cyber-cyan to-twitch-purple shrink-0 mt-1">
+                        <div class="bg-black p-1 rounded-sm">
+                            <div class="w-4 h-4 bg-white/90"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-white/40 font-mono mb-1">SYSTEM_CORE</div>
+                        <div
+                            class="glass p-5 rounded-none border-l-2 border-cyber-cyan text-sm leading-relaxed text-white/90 font-mono">
+                            Semantic Bridge Established.<br>
+                            Gemini 2.5 Neural Link Active.<br><br>
+                            Awaiting analysis directives for the imported dataset.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interaction Zone -->
+            <div class="p-6 border-t border-white/10 bg-black/60 backdrop-blur-xl z-20">
+                <!-- Quick Prompts -->
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                    <button onclick="usePrompt('Analyze the sentiment of these messages. Why is the score so low?')"
+                        class="whitespace-nowrap px-3 py-1.5 rounded border border-white/10 bg-white/5 hover:bg-cyber-cyan/20 hover:border-cyber-cyan text-xs text-white/60 hover:text-white font-mono transition-all">
+                        🔍 Analyze Negative Sentiment
+                    </button>
+                    <button
+                        onclick="usePrompt('Identify the top 3 most toxic users in this list and cite their messages.')"
+                        class="whitespace-nowrap px-3 py-1.5 rounded border border-white/10 bg-white/5 hover:bg-cyber-cyan/20 hover:border-cyber-cyan text-xs text-white/60 hover:text-white font-mono transition-all">
+                        ☢️ Identify Toxic Users
+                    </button>
+                    <button onclick="usePrompt('Summarize the main topic of conversation in this dataset.')"
+                        class="whitespace-nowrap px-3 py-1.5 rounded border border-white/10 bg-white/5 hover:bg-cyber-cyan/20 hover:border-cyber-cyan text-xs text-white/60 hover:text-white font-mono transition-all">
+                        📝 Summarize Topic
+                    </button>
+                    <button onclick="usePrompt('Extract any feature requests or bugs mentioned.')"
+                        class="whitespace-nowrap px-3 py-1.5 rounded border border-white/10 bg-white/5 hover:bg-cyber-cyan/20 hover:border-cyber-cyan text-xs text-white/60 hover:text-white font-mono transition-all">
+                        🐛 Find Bugs/Requests
+                    </button>
+                </div>
+
+                <!-- Input -->
+                <div class="relative max-w-5xl mx-auto flex gap-0 shadow-2xl shadow-twitch-purple/5">
+                    <textarea id="prompt-input" rows="1"
+                        class="w-full bg-black/80 border border-white/20 border-r-0 rounded-l-lg px-6 py-4 text-sm font-mono text-white focus:outline-none focus:border-cyber-cyan focus:bg-black transition-colors resize-none placeholder-white/20"
+                        placeholder="ENTER_COMMAND..."></textarea>
+                    <button id="send-btn"
+                        class="bg-white/10 border border-white/20 border-l-0 rounded-r-lg px-8 hover:bg-cyber-cyan hover:text-black font-bold font-mono tracking-wider transition-all">
+                        EXECUTE
+                    </button>
+                </div>
+                <div class="text-center mt-2 text-[10px] text-white/20 font-mono">SECURE SEND // PORT 8000 //
+                    GEMINI-2.5-PRO</div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let currentContext = [];
+
+        async function init() {
+            try {
+                // Verify Connection
+                const res = await fetch('/context');
+                const json = await res.json();
+                currentContext = json.data;
+                renderData(currentContext);
+
+                document.getElementById('status-indicator').innerHTML = '<div class="w-2 h-2 bg-neonGreen rounded-full animate-pulse shadow-[0_0_8px_#00FF94]"></div> SYSTEM_ONLINE';
+            } catch (e) {
+                console.error("Failed to fetch context", e);
+                document.getElementById('status-indicator').innerHTML = '<div class="w-2 h-2 bg-neonRed rounded-full"></div> DISCONNECTED';
+                addMessage('ERR', 'CRITICAL ERROR: Unable to reach backend server (localhost:8000). connection refused.', 'border-neonRed text-neonRed');
+            }
+        }
+
+        function renderData(data) {
+            const container = document.getElementById('data-container');
+            const countEl = document.getElementById('data-count');
+
+            countEl.innerText = `${data.length} UNITS`;
+
+            if (data.length === 0) {
+                container.innerHTML = '<div class="text-center mt-20 text-white/20 text-xs font-mono">[EMPTY_BUFFER]</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            data.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-3 border-b border-white/5 bg-white/0 hover:bg-white/5 transition-colors cursor-default group";
+                div.innerHTML = `
+                    <div class="flex justify-between text-[9px] text-white/30 font-mono mb-1 group-hover:text-cyber-cyan transition-colors">
+                        <span>// MSG_${idx + 1} [${item.user_name || 'ANON'}]</span>
+                        <span>${item.time}s</span>
+                    </div>
+                    <div class="text-xs text-white/70 break-words font-mono leading-tight">${item.message}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function usePrompt(text) {
+            const input = document.getElementById('prompt-input');
+            input.value = text;
+            input.focus();
+        }
+
+        async function sendPrompt() {
+            const input = document.getElementById('prompt-input');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            // Add User Msg
+            addMessage('USER', prompt, 'border-white/20 text-white');
+            input.value = '';
+
+            // Add Loading Indicator
+            const loadingId = addMessage('AI', 'Analyzing data stream...', 'border-cyber-cyan/50 text-cyber-cyan animate-pulse');
+
+            try {
+                const res = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        data: currentContext
+                    })
+                });
+                const data = await res.json();
+
+                // Remove Loading
+                document.getElementById(loadingId).remove();
+
+                // Add AI Response
+                addMessage('AI', data.response || "Error in response", 'border-cyber-cyan text-white shadow-[0_0_20px_rgba(0,240,255,0.1)]');
+
+            } catch (e) {
+                document.getElementById(loadingId).remove();
+                addMessage('ERR', 'Satellite Link Timed Out', 'border-neonRed text-neonRed');
+            }
+        }
+
+        function addMessage(sender, text, styleClasses) {
+            const stream = document.getElementById('chat-stream');
+            const id = 'msg-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300";
+
+            let icon = '';
+            if (sender === 'AI') icon = '<div class="w-4 h-4 bg-white/90"></div>';
+            if (sender === 'USER') icon = '<div class="w-4 h-4 rounded-full border border-white/50"></div>';
+            if (sender === 'ERR') icon = '<div class="w-4 h-4 bg-neonRed"></div>';
+
+            // Basic Markdown Parsing
+            let formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<b class="text-cyber-cyan">$1</b>') // Bold
+                .replace(/`(.*?)`/g, '<code class="bg-black/50 px-1 rounded text-neonGreen">$1</code>') // Code
+                .replace(/\n/g, '<br>');
+
+            div.innerHTML = `
+                <div class="p-1 rounded shrink-0 mt-1 ${sender === 'AI' ? 'bg-gradient-to-br from-cyber-cyan to-twitch-purple' : 'bg-white/10'}">
+                    <div class="bg-black p-1 rounded-sm">${icon}</div>
+                </div>
+                <div class="glass p-5 rounded-none border-l-2 ${styleClasses} text-sm leading-relaxed font-mono w-full max-w-3xl">
+                    ${formattedText}
+                </div>
+            `;
+            stream.appendChild(div);
+            stream.scrollTop = stream.scrollHeight;
+            return id;
+        }
+
+        document.getElementById('send-btn').addEventListener('click', sendPrompt);
+        document.getElementById('prompt-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendPrompt();
+            }
+        });
+
+        init();
+    </script>
+</body>
+
+</html>
